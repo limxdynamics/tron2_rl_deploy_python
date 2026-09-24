@@ -315,7 +315,8 @@ def hardware_joint_transform_enabled(robot_ip):
 class DASFController:
     """DA-SF ONNX policy controller using the Centaur SDK."""
 
-    JOY_BTNS = {"A": 0, "L1": 4, "R1": 5, "X": 2, "Y": 3}
+    # 自研遥控器为 PS 式枚举；不使用 L1+□，它是 TRON2 开发者模式的阻尼按键。
+    JOY_BTNS = {"CROSS": 0, "CIRCLE": 1, "SQUARE": 2, "TRIANGLE": 3, "L1": 4, "R1": 5}
     JOY_AXES = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 2}
     PYGAME_AXES = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 3}
 
@@ -389,7 +390,11 @@ class DASFController:
         self._upper_invalid = None
         self._imu_invalid = None
         self.start_controller = bool(start_controller)
-        self.mode = "WALK" if self.start_controller else "STAND"
+        # 上电后停在 IDLE，不自动进零位，需 L1+○ 才进 prepare。
+        self.mode = "WALK" if self.start_controller else "IDLE"
+        self._stand_start_q = None
+        self._stand_percent = 1.0
+        self._stand_reset_requested = False
         self._history_reset_requested = True
         self._walk_start_time = time.monotonic()
         self._last_r1 = 0
@@ -434,7 +439,10 @@ class DASFController:
             "direct pygame/F710" if self._pygame_enabled else "limxsdk SensorJoy"
         )
         print(f"Joystick source: {joystick_source}")
-        print("Joystick: L1 + Y start, L1 + X stop, R1 clear command/history")
+        print(
+            "Joystick: Prepare(进零位) L1 + ○, Start L1 + △, Stop L1 + ×, "
+            "R1 clear command/history"
+        )
 
     def _load_session(self, filename):
         path = os.path.join(self.model_dir, filename)
@@ -551,21 +559,35 @@ class DASFController:
         return 0.0 if abs(value) < threshold else value
 
     def _process_joystick(self, buttons, axes, r1_state_attr="_last_r1"):
-        l1 = buttons[self.JOY_BTNS["L1"]] if len(buttons) > self.JOY_BTNS["L1"] else 0
-        x_btn = buttons[self.JOY_BTNS["X"]] if len(buttons) > self.JOY_BTNS["X"] else 0
-        y_btn = buttons[self.JOY_BTNS["Y"]] if len(buttons) > self.JOY_BTNS["Y"] else 0
-        r1 = buttons[self.JOY_BTNS["R1"]] if len(buttons) > self.JOY_BTNS["R1"] else 0
+        def pressed(name):
+            index = self.JOY_BTNS[name]
+            return buttons[index] if len(buttons) > index else 0
+
+        l1 = pressed("L1")
+        cross = pressed("CROSS")
+        circle = pressed("CIRCLE")
+        triangle = pressed("TRIANGLE")
+        r1 = pressed("R1")
 
         with self._control_lock:
-            if not self.start_controller and l1 and y_btn:
-                print("L1 + Y: start DA-SF policy")
+            if l1 and circle and self.mode != "STAND":
+                print("L1 + ○: prepare(进零位)...")
+                self.start_controller = False
+                self.mode = "STAND"
+                # 插值起点在主循环里按下键时刻的实测姿态重新采样
+                self._stand_reset_requested = True
+                self.command.fill(0.0)
+                self._history_reset_requested = True
+
+            if not self.start_controller and l1 and triangle:
+                print("L1 + △: start DA-SF policy")
                 self.start_controller = True
                 self.mode = "WALK"
                 self._history_reset_requested = True
                 self._walk_start_time = time.monotonic()
 
-            if self.start_controller and l1 and x_btn:
-                print("L1 + X: stop DA-SF policy")
+            if l1 and cross and self.mode != "IDLE":
+                print("L1 + ×: stop DA-SF policy")
                 self.start_controller = False
                 self.mode = "IDLE"
                 self.command.fill(0.0)
@@ -655,9 +677,11 @@ class DASFController:
                 self.mode,
                 self.command.copy(),
                 self._history_reset_requested,
+                self._stand_reset_requested,
                 self._walk_start_time,
             )
             self._history_reset_requested = False
+            self._stand_reset_requested = False
         return state
 
     def _snapshot(self, require_imu=True):
@@ -678,7 +702,7 @@ class DASFController:
             q, dq = hardware_to_policy_state(self.config, q, dq)
         return q, dq, quaternion, gyro
 
-    def _make_sdk_command(self, q, kp, kd, names):
+    def _make_sdk_command(self, q, kp, kd):
         """limxsdk datatypes.RobotCmd（SDK 端字段：dq/Kp/Kd/motor_names）。"""
         command = self._limx_datatypes.RobotCmd()
         command.stamp = time.time_ns()
@@ -689,7 +713,8 @@ class DASFController:
         command.tau = [0.0] * num_joints
         command.Kp = list(kp)
         command.Kd = list(kd)
-        command.motor_names = list(names)
+        # 与机器人端缓存一致：留空名，按线序下标匹配。
+        command.motor_names = [""] * num_joints
         command.parallel_solve_required = [False] * num_joints
         return command
 
@@ -702,16 +727,11 @@ class DASFController:
         if kd is None:
             kd = self.config.kd
         lower = self.config.num_lower
-        names = self.config.wire_joint_names
         self.sdk_robot.publishLowerBodyRobotCmd(
-            self._make_sdk_command(
-                targets[:lower], kp[:lower], kd[:lower], names[:lower]
-            )
+            self._make_sdk_command(targets[:lower], kp[:lower], kd[:lower])
         )
         self.sdk_robot.publishUpperBodyRobotCmd(
-            self._make_sdk_command(
-                targets[lower:], kp[lower:], kd[lower:], names[lower:]
-            )
+            self._make_sdk_command(targets[lower:], kp[lower:], kd[lower:])
         )
 
     def _wait_for_state(self, timeout=None):
@@ -723,7 +743,10 @@ class DASFController:
         while time.monotonic() < deadline:
             try:
                 q, _, _, _ = self._snapshot(require_imu=False)
-                self._publish_targets(q)
+                # 上电停在 IDLE：只阻尼，不带刚度锁位。
+                self._publish_targets(
+                    q, kp=np.zeros(self.config.num_joints), kd=self.config.kd
+                )
             except RuntimeError:
                 pass
             try:
@@ -758,25 +781,25 @@ class DASFController:
             f"joystick(count={self.joy_msg_count})"
         )
 
-    def _move_to_default_pose(self, start_q):
-        print(f"Moving to training default pose over {self.stand_duration:.1f}s")
-        start_time = time.monotonic()
-        next_tick = start_time
-        while True:
-            self._snapshot(require_imu=True)
-            elapsed = time.monotonic() - start_time
-            ratio = min(elapsed / self.stand_duration, 1.0)
-            smooth_ratio = ratio * ratio * (3.0 - 2.0 * ratio)
-            targets = (
-                start_q * (1.0 - smooth_ratio)
-                + self.config.default_q * smooth_ratio
+    def _stand_step(self, q, reset):
+        """进零位：从 L1+○ 按下时刻的实测姿态插值到训练默认姿态。"""
+        if reset or self._stand_start_q is None:
+            self._stand_start_q = np.asarray(q, dtype=np.float64).copy()
+            self._stand_percent = 0.0
+            print(f"Moving to training default pose over {self.stand_duration:.1f}s")
+        ratio = min(max(self._stand_percent, 0.0), 1.0)
+        smooth_ratio = ratio * ratio * (3.0 - 2.0 * ratio)
+        targets = (
+            self._stand_start_q * (1.0 - smooth_ratio)
+            + self.config.default_q * smooth_ratio
+        )
+        self._publish_targets(targets)
+        if self._stand_percent < 1.0:
+            self._stand_percent += 1.0 / (
+                self.stand_duration * self.config.policy_frequency
             )
-            self._publish_targets(targets)
-            if ratio >= 1.0:
-                break
-            next_tick += 1.0 / self.config.stand_control_frequency
-            time.sleep(max(0.0, next_tick - time.monotonic()))
-        print("Training default pose reached")
+            if self._stand_percent >= 1.0:
+                print("Training default pose reached")
 
     @staticmethod
     def _onnx_input(session, vector):
@@ -807,23 +830,41 @@ class DASFController:
             raise RuntimeError("Policy returned an invalid action")
         return np.clip(actions, -self.action_clip, self.action_clip)
 
-    def _publish_damping_stop(self):
+    def _publish_damping_stop(self, duration=1.0):
+        """退出前的阻尼收尾：等同 L1 + X，按控制频率持续下发 kp=0 直到 duration 结束。"""
+        with self._control_lock:
+            self.start_controller = False
+            self.mode = "IDLE"
+            self.command.fill(0.0)
+            self._history_reset_requested = True
+        zero_kp = np.zeros(self.config.num_joints)
+        period = 1.0 / self.config.stand_control_frequency
+        deadline = time.monotonic() + max(0.0, float(duration))
+        published = False
         try:
-            q, _, _, _ = self._snapshot(require_imu=False)
-        except RuntimeError:
-            return
-        self._publish_targets(
-            q, kp=np.zeros(self.config.num_joints), kd=self.config.kd
-        )
-        print("Published damping stop command")
+            while True:
+                try:
+                    q, _, _, _ = self._snapshot(require_imu=False)
+                except RuntimeError:
+                    break
+                self._publish_targets(q, kp=zero_kp, kd=self.config.kd)
+                published = True
+                if time.monotonic() >= deadline:
+                    break
+                time.sleep(period)
+        except KeyboardInterrupt:
+            print("Damping stop interrupted by a second Ctrl+C")
+        if published:
+            print("Published damping stop command")
+        else:
+            print("Damping stop skipped: no valid joint state")
 
     def run(self, duration=0.0):
         try:
-            initial_q, _, _, _ = self._wait_for_state()
-            self._move_to_default_pose(initial_q)
+            self._wait_for_state()
             print(
                 f"DA-SF ready at {self.config.policy_frequency:g} Hz; "
-                "press L1 + Y to start"
+                "press L1 + ○ to prepare, then L1 + △ to start"
             )
             start_time = time.monotonic()
             next_tick = start_time
@@ -836,11 +877,12 @@ class DASFController:
                     mode,
                     command,
                     reset_history,
+                    stand_reset,
                     walk_start_time,
                 ) = self._consume_control_state()
                 if not policy_enabled:
                     if mode == "STAND":
-                        self._publish_targets(self.config.default_q)
+                        self._stand_step(q, stand_reset)
                     else:
                         self._publish_targets(
                             q,
@@ -890,7 +932,7 @@ class DASFController:
                     next_tick = time.monotonic()
                 time.sleep(max(0.0, next_tick - time.monotonic()))
         except KeyboardInterrupt:
-            print("Controller interrupted")
+            print("Ctrl+C: stopping policy and entering damping")
         except RuntimeError as error:
             print(f"DA-SF controller stopped: {error}")
         finally:
