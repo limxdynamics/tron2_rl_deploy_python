@@ -63,9 +63,9 @@ pip install numpy scipy pyyaml onnxruntime pygame
 pip install ruff  # for lint
 
 # LimX SDK wheel (pick your arch)
-pip install limxsdk-lowlevel/python3/amd64/limxsdk-*-py3-none-any.whl
+pip install limxsdk-lowlevel/python3/amd64/limxsdk-*.whl
 # or
-pip install limxsdk-lowlevel/python3/aarch64/limxsdk-*-py3-none-any.whl
+pip install limxsdk-lowlevel/python3/aarch64/limxsdk-*.whl
 ```
 
 If you are only editing docs / CI / non-import-time code, you can skip

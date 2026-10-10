@@ -112,7 +112,7 @@ install them (`pip install …`) to run `main.py`.
 | scipy | `scipy.spatial.transform.Rotation` (IMU quat → rotation) | BSD-3-Clause | |
 | PyYAML | Load `controllers/model/*/params.yaml` | MIT | |
 | pygame | Optional joystick input (`use_pygame_joystick=True`) | LGPL-2.1-or-later | Optional. If a downstream distribution links against pygame in a way that triggers LGPL obligations, document it in the downstream distribution — this repository imports it lazily. |
-| limxsdk (vendor wheel) | Robot connection, state / IMU / joystick / cmd IO | ⚠ TO CONFIRM | Installed by the user from `limxsdk-lowlevel/python3/{amd64,aarch64}/limxsdk-*-py3-none-any.whl`. See §3. |
+| limxsdk (vendor wheel) | Robot connection, state / IMU / joystick / cmd IO | ⚠ TO CONFIRM | Installed by the user from `limxsdk-lowlevel/python3/{amd64,aarch64}/limxsdk-*.whl`. See §3. |
 
 None of the above are bundled here; users must obtain and license them
 independently.

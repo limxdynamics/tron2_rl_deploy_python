@@ -97,10 +97,10 @@ pip install numpy scipy pyyaml onnxruntime pygame
 git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
 
 # x86_64 示例
-pip install limxsdk-lowlevel/python3/amd64/limxsdk-*-py3-none-any.whl
+pip install limxsdk-lowlevel/python3/amd64/limxsdk-*.whl
 
 # aarch64 示例
-pip install limxsdk-lowlevel/python3/aarch64/limxsdk-*-py3-none-any.whl
+pip install limxsdk-lowlevel/python3/aarch64/limxsdk-*.whl
 ```
 
 ## 3. 模型文件放置规则

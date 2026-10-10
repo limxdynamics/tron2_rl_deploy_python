@@ -38,6 +38,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `contact@limxdynamics.com`.
 
 ### Changed
+- `limxsdk-lowlevel` submodule pinned to `61624b5` (limxsdk 4.1.2). The
+  SDK wheels are now `cp38-abi3-manylinux_2_29` builds, so install
+  commands in the docs use `limxsdk-*.whl` instead of
+  `limxsdk-*-py3-none-any.whl`.
+- `DASF_TRON2A` controller: PS-style gamepad mapping (`L1 + ○` prepare,
+  `L1 + △` start, `L1 + ×` stop); powers up in damped IDLE instead of
+  moving to the default pose automatically.
 - `.gitignore` expanded from a single-line `__pycache__` to a
   Python-appropriate ignore list (venv, caches, editor / OS junk,
   build artifacts), plus a hard deny-list for weight / SDK / bag
