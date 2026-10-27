@@ -52,8 +52,8 @@ Prerequisites:
 
 ```bash
 git clone --recurse-submodules \
-  https://github.com/limx-tron2/tron2-rl-deploy-python.git
-cd tron2-rl-deploy-python
+  https://github.com/limxdynamics/tron2_rl_deploy_python.git
+cd tron2_rl_deploy_python
 
 python -m venv .venv
 source .venv/bin/activate
@@ -165,10 +165,12 @@ python -c "import onnx, glob
 for p in glob.glob('controllers/model/*/*.onnx'):
     onnx.checker.check_model(onnx.load(p)); print('OK', p)"
 
-# 6. No unresolved TODO / proprietary / confidential markers in docs
+# 6. No unresolved license / provenance markers in docs
+#    (prints nothing when clean; same filter as CI)
 grep -rniE 'proprietary|confidential|todo: license|unknown license' \
    README.md THIRD_PARTY_NOTICES.md MODEL_CARD.md \
-   CHANGELOG.md CONTRIBUTING.md SECURITY.md
+   CHANGELOG.md CONTRIBUTING.md SECURITY.md \
+ | grep -viE "grep -rniE|no proprietary"
 ```
 
 If your change affects the control tick, additionally test against the

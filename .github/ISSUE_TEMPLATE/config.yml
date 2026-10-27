@@ -7,7 +7,8 @@ contact_links:
       Email contact@limxdynamics.com; see SECURITY.md for the full
       policy, including the real-hardware safety notice.
   - name: General questions
-    url: https://github.com/limx-tron2/tron2-rl-deploy-python/discussions
+    url: https://github.com/limxdynamics/tron2_rl_deploy_python#8-faq
     about: >
-      Use Discussions for how-to questions, sim2real integration help,
-      or joystick / SDK setup that is not yet a defect.
+      Check the README FAQ first. For how-to questions, sim2real
+      integration help, or joystick / SDK setup, open a feature request
+      describing what you are trying to do.

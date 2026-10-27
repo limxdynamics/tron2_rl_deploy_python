@@ -38,6 +38,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `contact@limxdynamics.com`.
 
 ### Changed
+- CI now runs on `master`, the default branch (it was set to `main` and
+  had never run). Pre-existing failures fixed so every job passes:
+  `ruff` findings in the controllers and tools (import cleanup,
+  `range(0, n)` -> `range(n)`, `ClassVar` on the joystick maps, a
+  `ruff.toml` that keeps the `*Controller.py` module names); the hard-coded
+  `10.192.1.4` default in `tools/joy_probe.py` (now `127.0.0.1`, like
+  `main.py`); the docs scan matching its own command and the phrase
+  "no proprietary"; and metadata in `doc/` media (Douyin/CapCut device and
+  user IDs in the comments of `doc/dasf.GIF` and `doc/mujoco_dasf.gif`
+  removed; `doc/deploy.jpg` converted from Display P3 to sRGB without the
+  embedded profile). Frames and images are otherwise unchanged.
+- Repository links moved from `limx-tron2/tron2-rl-deploy-python` (which
+  does not resolve) to `limxdynamics/tron2_rl_deploy_python` in the
+  README distribution note, CONTRIBUTING, CHANGELOG links and the issue
+  template; the issue template's "General questions" link now points at
+  the README FAQ because Discussions are disabled.
 - `README.md` / `README_zh-CN.md`: landing page with banner, model cards,
   sim-to-real picture, highlights and quick start (new images
   `doc/banner.png`, `doc/sim2real_{en,zh}.png`, `doc/model_{sf,wf,dasf}.png`;
@@ -117,5 +133,5 @@ First public release. Contents:
 - LimX SDK consumed via the `limxsdk-lowlevel` submodule; SDK wheel is
   **not** vendored.
 
-[Unreleased]: https://github.com/limx-tron2/tron2-rl-deploy-python/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/limx-tron2/tron2-rl-deploy-python/releases/tag/v0.1.0
+[Unreleased]: https://github.com/limxdynamics/tron2_rl_deploy_python/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/limxdynamics/tron2_rl_deploy_python/releases/tag/v0.1.0

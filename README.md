@@ -22,7 +22,7 @@
 
 > **Distribution.** The primary public distribution point for this
 > repository is GitHub:
-> <https://github.com/limx-tron2/tron2-rl-deploy-python>. The internal
+> <https://github.com/limxdynamics/tron2_rl_deploy_python>. The internal
 > LimX GitLab is a mirror; open issues, PRs, and security reports on
 > the GitHub repository.
 

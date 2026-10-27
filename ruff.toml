@@ -1,0 +1,4 @@
+# Controller modules keep their class-style file names (SolefootController.py,
+# ...); main.py and users import them by those names.
+[lint.per-file-ignores]
+"controllers/*Controller.py" = ["N999"]

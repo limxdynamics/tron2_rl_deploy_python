@@ -1,7 +1,8 @@
 import argparse
 import os
 import sys
-import controllers as controllers
+
+import controllers
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="TRON2 policy controller entry")
@@ -34,8 +35,7 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # Create a Robot instance of the specified type
-    import limxsdk.robot.Robot as Robot
-    import limxsdk.robot.RobotType as RobotType
+    from limxsdk.robot import Robot, RobotType
     robot = Robot(RobotType.Tron2)
 
     # Initialize the robot with the provided IP address

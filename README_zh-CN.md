@@ -21,7 +21,7 @@
 # tron2-rl-deploy-python 使用说明
 
 > **发布渠道。** 本仓库的主发布点为 GitHub：
-> <https://github.com/limx-tron2/tron2-rl-deploy-python>。
+> <https://github.com/limxdynamics/tron2_rl_deploy_python>。
 > LimX 内部 GitLab 为镜像；Issue、PR 与安全报告请提交到 GitHub。
 
 面向 TRON2A 人形机器人（足底 `SF_TRON2A`、轮足 `WF_TRON2A` 与

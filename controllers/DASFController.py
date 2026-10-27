@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """DA-SF policy controller using the dual-channel Centaur SDK."""
 
 import ipaddress
@@ -6,6 +5,7 @@ import math
 import os
 import threading
 import time
+from typing import ClassVar
 
 import numpy as np
 import yaml
@@ -316,9 +316,9 @@ class DASFController:
     """DA-SF ONNX policy controller using the Centaur SDK."""
 
     # 自研遥控器为 PS 式枚举；不使用 L1+□，它是 TRON2 开发者模式的阻尼按键。
-    JOY_BTNS = {"CROSS": 0, "CIRCLE": 1, "SQUARE": 2, "TRIANGLE": 3, "L1": 4, "R1": 5}
-    JOY_AXES = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 2}
-    PYGAME_AXES = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 3}
+    JOY_BTNS: ClassVar[dict] = {"CROSS": 0, "CIRCLE": 1, "SQUARE": 2, "TRIANGLE": 3, "L1": 4, "R1": 5}
+    JOY_AXES: ClassVar[dict] = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 2}
+    PYGAME_AXES: ClassVar[dict] = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 3}
 
     def __init__(
         self,

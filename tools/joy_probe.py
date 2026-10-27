@@ -1,12 +1,11 @@
 """只读手柄探针：订阅 SensorJoy 并打印原始 axes/buttons，不下发任何指令。
 
-用法: python3 tools/joy_probe.py 10.192.1.4
+用法: python3 tools/joy_probe.py <robot-ip>   (默认 127.0.0.1，即本机仿真)
 """
 import sys
 import time
 
-import limxsdk.robot.Robot as Robot
-import limxsdk.robot.RobotType as RobotType
+from limxsdk.robot import Robot, RobotType
 
 # 与 WheelfootController.JOY_BTNS / JOY_AXES 保持一致
 EXPECTED_BTNS = {"×": 0, "○": 1, "□": 2, "△": 3, "L1": 4, "R1": 5}
@@ -43,7 +42,7 @@ def on_joy(joy):
 
 
 if __name__ == '__main__':
-    ip = sys.argv[1] if len(sys.argv) > 1 else "10.192.1.4"
+    ip = sys.argv[1] if len(sys.argv) > 1 else "127.0.0.1"
     robot = Robot(RobotType.Tron2)
     if not robot.init(ip):
         sys.exit("robot.init failed")

@@ -1,17 +1,15 @@
-import os
-import sys
 import copy
-import numpy as np
-import yaml
+import os
 import time
-import onnxruntime as ort
-from scipy.spatial.transform import Rotation as R
 from functools import partial
-import limxsdk
-import limxsdk.robot.Rate as Rate
-import limxsdk.robot.Robot as Robot
-import limxsdk.robot.RobotType as RobotType
-import limxsdk.datatypes as datatypes
+from typing import ClassVar
+
+import numpy as np
+import onnxruntime as ort
+import yaml
+from limxsdk import datatypes
+from limxsdk.robot import Rate
+from scipy.spatial.transform import Rotation as R
 
 try:
     # 无图形会话时 SDL 初始化视频子系统会段错误，手柄只需 joystick 子系统
@@ -24,9 +22,9 @@ except ImportError:
 
 class WheelfootController:
     # 自研遥控器按 PS 式枚举：× / ○ / □ / △
-    JOY_BTNS = {"CROSS": 0, "CIRCLE": 1, "SQUARE": 2, "TRIANGLE": 3, "L1": 4, "R1": 5}
-    JOY_AXES = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 2}
-    PYGAME_AXES = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 3}
+    JOY_BTNS: ClassVar[dict] = {"CROSS": 0, "CIRCLE": 1, "SQUARE": 2, "TRIANGLE": 3, "L1": 4, "R1": 5}
+    JOY_AXES: ClassVar[dict] = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 2}
+    PYGAME_AXES: ClassVar[dict] = {"left_vertical": 1, "left_horizon": 0, "right_horizon": 3}
 
     def __init__(self, model_dir, robot, robot_type, start_controller, use_pygame_joystick=False):
         # Initialize robot and type information
@@ -46,19 +44,19 @@ class WheelfootController:
 
         # Prepare robot command structure with default values for mode, q, dq, tau, Kp, Kd
         self.robot_cmd = datatypes.RobotCmd()
-        self.robot_cmd.mode = [0. for x in range(0, self.joint_num)]
-        self.robot_cmd.q = [0. for x in range(0, self.joint_num)]
-        self.robot_cmd.dq = [0. for x in range(0, self.joint_num)]
-        self.robot_cmd.tau = [0. for x in range(0, self.joint_num)]
-        self.robot_cmd.Kp = [self.control_cfg.get('leg_joint_stiffness', self.control_cfg.get('stiffness', 0.0)) for x in range(0, self.joint_num)]
-        self.robot_cmd.Kd = [self.control_cfg.get('leg_joint_damping', self.control_cfg.get('damping', 0.0)) for x in range(0, self.joint_num)]
+        self.robot_cmd.mode = [0. for x in range(self.joint_num)]
+        self.robot_cmd.q = [0. for x in range(self.joint_num)]
+        self.robot_cmd.dq = [0. for x in range(self.joint_num)]
+        self.robot_cmd.tau = [0. for x in range(self.joint_num)]
+        self.robot_cmd.Kp = [self.control_cfg.get('leg_joint_stiffness', self.control_cfg.get('stiffness', 0.0)) for x in range(self.joint_num)]
+        self.robot_cmd.Kd = [self.control_cfg.get('leg_joint_damping', self.control_cfg.get('damping', 0.0)) for x in range(self.joint_num)]
         self.robot_cmd.motor_names = ["" for _ in range(self.joint_num)]
 
         # Prepare robot state structure
         self.robot_state = datatypes.RobotState()
-        self.robot_state.tau = [0. for x in range(0, self.joint_num)]
-        self.robot_state.q = [0. for x in range(0, self.joint_num)]
-        self.robot_state.dq = [0. for x in range(0, self.joint_num)]
+        self.robot_state.tau = [0. for x in range(self.joint_num)]
+        self.robot_state.q = [0. for x in range(self.joint_num)]
+        self.robot_state.dq = [0. for x in range(self.joint_num)]
         self.robot_state_tmp = copy.deepcopy(self.robot_state)
 
         # Initialize IMU (Inertial Measurement Unit) data structure
@@ -458,7 +456,7 @@ class WheelfootController:
             self._pygame_joystick.init()
             self._pygame_enabled = True
             print(f"pygame joystick ready: {self._pygame_joystick.get_name()}")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - any pygame failure falls back to the SDK joystick
             self._pygame_enabled = False
             self._pygame_joystick = None
             print(f"pygame joystick init failed: {exc}")
