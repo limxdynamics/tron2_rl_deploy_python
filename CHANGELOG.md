@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ruff` findings in the controllers and tools (import cleanup,
   `range(0, n)` -> `range(n)`, `ClassVar` on the joystick maps, a
   `ruff.toml` that keeps the `*Controller.py` module names); the hard-coded
-  `10.192.1.4` default in `tools/joy_probe.py` (now `127.0.0.1`, like
+  private-IP default in `tools/joy_probe.py` (now `127.0.0.1`, like
   `main.py`); the docs scan matching its own command and the phrase
   "no proprietary"; and metadata in `doc/` media (Douyin/CapCut device and
   user IDs in the comments of `doc/dasf.GIF` and `doc/mujoco_dasf.gif`
