@@ -4,7 +4,7 @@
 -->
 
 <p align="center">
-  <img src="doc/banner.png" alt="tron2_rl_deploy_python：RL 策略网络部署到足底、轮足和双臂 TRON2A" width="100%">
+  <img src="doc/banner.png" alt="tron2_rl_deploy_python：本仓库可部署 RL 策略的足底、轮足和双臂 TRON2A" width="100%">
 </p>
 
 <p align="center">

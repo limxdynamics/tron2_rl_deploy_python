@@ -4,7 +4,7 @@
 -->
 
 <p align="center">
-  <img src="doc/banner.png" alt="tron2_rl_deploy_python: one RL policy network deployed to the sole-foot, wheel-foot and dual-arm TRON2A robots" width="100%">
+  <img src="doc/banner.png" alt="tron2_rl_deploy_python: the sole-foot, wheel-foot and dual-arm TRON2A robots this repository deploys RL policies to" width="100%">
 </p>
 
 <p align="center">
