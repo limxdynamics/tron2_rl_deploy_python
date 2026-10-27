@@ -59,6 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cropped to the 3D viewport (desktop dock, title bar and MuJoCo side
   panels removed), resized to 300x300 and shown side by side; the three
   files drop from about 29.6 MB to about 3.1 MB.
+- Real-world GIFs (`doc/sf.GIF`, `doc/wf.GIF`, `doc/dasf.GIF`) center-cropped
+  to square, resized to 300x300 at 8 fps and shown side by side; the
+  three files drop from about 131 MB to about 10.4 MB.
 - `README.md` / `README_zh-CN.md`: landing page with banner, model cards,
   sim-to-real picture, highlights and quick start (new images
   `doc/banner.png`, `doc/sim2real_{en,zh}.png`, `doc/model_{sf,wf,dasf}.png`;

@@ -222,11 +222,11 @@ joystick axes are scaled by `commands.max` in
 Suspend the robot before starting the controller when deploying on
 real hardware.
 
-![Deploy](doc/deploy.jpg)
+<img src="doc/deploy.jpg" alt="Deploy" width="360">
 
-![SF Real-world](doc/wf.GIF)
-![WF Real-world](doc/sf.GIF)
-![DASF Real-world](doc/dasf.GIF)
+| SF_TRON2A | WF_TRON2A | DASF_TRON2A |
+| :---: | :---: | :---: |
+| <img src="doc/wf.GIF" alt="SF Real-world" width="260"> | <img src="doc/sf.GIF" alt="WF Real-world" width="260"> | <img src="doc/dasf.GIF" alt="DASF Real-world" width="260"> |
 
 ## 8. FAQ
 
