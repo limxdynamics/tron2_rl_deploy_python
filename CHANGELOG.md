@@ -38,6 +38,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `contact@limxdynamics.com`.
 
 ### Changed
+- `README.md` / `README_zh-CN.md`: landing page with banner, model cards,
+  sim-to-real picture, highlights and quick start (new images
+  `doc/banner.png`, `doc/sim2real_{en,zh}.png`, `doc/model_{sf,wf,dasf}.png`;
+  the banner and sim-to-real photos are frames from `doc/sf.GIF`,
+  `doc/wf.GIF`, `doc/dasf.GIF` and `doc/mujoco_dasf.gif`). Gamepad notes
+  now match the controllers (`L1 + B` stand, `L1 + Y` walk, `L1 + A`
+  idle); SF / WF real-world GIF captions corrected; "Cite & support"
+  links point at this repository; License, Scope and Distribution text
+  unchanged, License and Scope moved to the end.
 - `limxsdk-lowlevel` submodule pinned to `61624b5` (limxsdk 4.1.2). The
   SDK wheels are now `cp38-abi3-manylinux_2_29` builds, so install
   commands in the docs use `limxsdk-*.whl` instead of
