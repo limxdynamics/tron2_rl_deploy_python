@@ -57,8 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `README.md` / `README_zh-CN.md`: landing page with banner, model cards,
   sim-to-real picture, highlights and quick start (new images
   `doc/banner.png`, `doc/sim2real_{en,zh}.png`, `doc/model_{sf,wf,dasf}.png`;
-  the banner and sim-to-real photos are frames from `doc/sf.GIF`,
-  `doc/wf.GIF`, `doc/dasf.GIF` and `doc/mujoco_dasf.gif`). Gamepad notes
+  the banner shows MuJoCo renders of the three robots; the sim-to-real
+  picture uses frames from `doc/dasf.GIF` and `doc/mujoco_dasf.gif`). Gamepad notes
   now match the controllers (`L1 + B` stand, `L1 + Y` walk, `L1 + A`
   idle); SF / WF real-world GIF captions corrected; "Cite & support"
   links point at this repository; License, Scope and Distribution text
