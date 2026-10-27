@@ -54,6 +54,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   README distribution note, CONTRIBUTING, CHANGELOG links and the issue
   template; the issue template's "General questions" link now points at
   the README FAQ because Discussions are disabled.
+- MuJoCo simulation GIFs (`doc/sfmj-ezgif.com-video-to-gif-converter.gif`,
+  `doc/wfmj-ezgif.com-video-to-gif-converter.gif`, `doc/mujoco_dasf.gif`)
+  cropped to the 3D viewport (desktop dock, title bar and MuJoCo side
+  panels removed), resized to 300x300 and shown side by side; the three
+  files drop from about 29.6 MB to about 3.1 MB.
 - `README.md` / `README_zh-CN.md`: landing page with banner, model cards,
   sim-to-real picture, highlights and quick start (new images
   `doc/banner.png`, `doc/sim2real_{en,zh}.png`, `doc/model_{sf,wf,dasf}.png`;

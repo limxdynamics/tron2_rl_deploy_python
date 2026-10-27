@@ -213,9 +213,9 @@ joystick axes are scaled by `commands.max` in
 
 ### MuJoCo simulation deployment
 
-![SF Simulation](doc/sfmj-ezgif.com-video-to-gif-converter.gif)
-![WF Simulation](doc/wfmj-ezgif.com-video-to-gif-converter.gif)
-![DASF MuJoCo Simulation](doc/mujoco_dasf.gif)
+| SF_TRON2A | WF_TRON2A | DASF_TRON2A |
+| :---: | :---: | :---: |
+| <img src="doc/sfmj-ezgif.com-video-to-gif-converter.gif" alt="SF Simulation" width="260"> | <img src="doc/wfmj-ezgif.com-video-to-gif-converter.gif" alt="WF Simulation" width="260"> | <img src="doc/mujoco_dasf.gif" alt="DASF MuJoCo Simulation" width="260"> |
 
 ### Real-world deployment
 
