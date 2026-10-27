@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/limxdynamics/tron2_rl_deploy_python/actions/workflows/ci.yml"><img src="https://github.com/limxdynamics/tron2_rl_deploy_python/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-2f6feb" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/Python-3-2f6feb" alt="Python 3">
   <img src="https://img.shields.io/badge/ONNX%20Runtime-CPU-2f6feb" alt="ONNX Runtime">
