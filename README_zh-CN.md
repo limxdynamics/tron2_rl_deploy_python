@@ -19,22 +19,22 @@
   <img src="https://img.shields.io/badge/ROS-not%20required-2f6feb" alt="ROS not required">
 </p>
 
-# tron2-rl-deploy-python 使用说明
+# tron2-rl-deploy-python
 
 > **发布渠道。** 本仓库的主发布点为 GitHub：
 > <https://github.com/limxdynamics/tron2_rl_deploy_python>。
 > LimX 内部 GitLab 为镜像；Issue、PR 与安全报告请提交到 GitHub。
 
-面向 TRON2A 人形机器人（足底 `SF_TRON2A`、轮足 `WF_TRON2A` 与
-双臂足式 `DASF_TRON2A` 三种形态）的
-强化学习**部署 / 推理**栈（Python 实现）。通过 `onnxruntime` 加载 ONNX
-策略，经 LimX 底层 SDK 下发关节目标，既可对接 MuJoCo 仿真，也可用于实机部署。
+面向 TRON2A 人形机器人（足底 `SF_TRON2A`、轮足 `WF_TRON2A` 与双臂足式 `DASF_TRON2A` 三种形态）的
+强化学习**部署 / 推理**栈（Python 实现）。通过 `onnxruntime` 加载 ONNX 策略，经 LimX 底层 SDK
+下发关节目标，既可对接 MuJoCo 仿真，也可用于实机部署。
 
 ## 亮点
 
 - **三种机型，一个入口。** `main.py` 根据 `ROBOT_TYPE` 选择 SF、WF 或 DA-SF 控制器。
 - **仿真和真机同一条命令。** 不带参数连接本机 MuJoCo 仿真；`python3 main.py <robot-ip>` 驱动真机。
-- **自带策略。** 三种机型的策略和历史编码器 ONNX 文件都在 `controllers/model/` 下，见 [`MODEL_CARD.md`](MODEL_CARD.md)。
+- **自带策略。** 三种机型的策略和历史编码器 ONNX 文件都在 `controllers/model/` 下，见
+  [`MODEL_CARD.md`](MODEL_CARD.md)。
 - **手柄直连或经 SDK。** 通过 pygame 直接读取罗技 F710；没有手柄时回退到 SDK `SensorJoy`。
 - **先空跑再上真机。** `python3 main.py <robot-ip> --dry-run`（SF / WF）只校验并打印关节指令，不下发。
 
@@ -73,74 +73,46 @@ python3 main.py
 - `main.py`：控制器入口程序（根据 `ROBOT_TYPE` 自动选择 SF/WF/DA-SF 控制器）。
 - `controllers/SolefootController.py`：`SF_TRON2A` 推理与控制逻辑。
 - `controllers/WheelfootController.py`：`WF_TRON2A` 推理与控制逻辑。
-- `controllers/DASFController.py`：`DASF_TRON2A` 推理与控制逻辑。
+- `controllers/DASFController.py`：`DASF_TRON2A` 经 Centaur SDK 的双通道推理与控制逻辑。
 - `controllers/model/<ROBOT_TYPE>/`：每种机型的模型与配置文件目录。
-- `limxsdk-lowlevel/`：LimX SDK 及示例代码。
+- `limxsdk-lowlevel/`：LimX SDK 及示例代码（`git submodule`）。
 
 ## 2. 环境准备
 
-### Step 1: 安装 Python 依赖
+Python 3.10+。快速开始已覆盖 CPU 运行依赖和 x86_64 的 SDK wheel；下面两件事它没有覆盖：
 
 ```bash
-pip install -U pip
-pip install numpy scipy pyyaml onnxruntime pygame
+pip install -U pip                                            # pip 版本低于 wheel 要求时
+pip install limxsdk-lowlevel/python3/aarch64/limxsdk-*.whl    # aarch64 平台
 ```
 
-### Step 2: 安装 LimX SDK（必须）
+SDK wheel 必须与运行 `main.py` 的解释器一致。`limxsdk-lowlevel/` 是子模块：如果克隆时没加
+`--recurse-submodules`，先执行 `git submodule update --init --recursive` 再装 wheel。
 
-按你的系统架构安装 wheel：
+## 3. 模型文件
 
-```bash
-git clone https://github.com/limxdynamics/limxsdk-lowlevel.git
+六个 ONNX 文件随仓库提供 —— 每种机型一个策略、一个历史编码器 —— 与各自的 `params.yaml` 放在一起：
 
-# x86_64 示例
-pip install limxsdk-lowlevel/python3/amd64/limxsdk-*.whl
-
-# aarch64 示例
-pip install limxsdk-lowlevel/python3/aarch64/limxsdk-*.whl
+```text
+controllers/model/
+├── SF_TRON2A/      policy.onnx  encoder.onnx  params.yaml
+├── WF_TRON2A/      policy.onnx  encoder.onnx  params.yaml
+└── DASF_TRON2A/    policy.onnx  encoder.onnx  params.yaml
 ```
 
-## 3. 模型文件放置规则
-
-模型文件需要按机型放在：
-
-- `controllers/model/SF_TRON2A/policy.onnx`
-- `controllers/model/SF_TRON2A/encoder.onnx`
-- `controllers/model/SF_TRON2A/params.yaml`
-- `controllers/model/WF_TRON2A/policy.onnx`
-- `controllers/model/WF_TRON2A/encoder.onnx`
-- `controllers/model/WF_TRON2A/params.yaml`
-- `controllers/model/DASF_TRON2A/policy.onnx`
-- `controllers/model/DASF_TRON2A/encoder.onnx`
-- `controllers/model/DASF_TRON2A/params.yaml`
+`params.yaml` 是各机型的运行时配置：关节顺序、`loop_frequency`、PD 增益、动作缩放，以及手柄轴
+缩放所用的 `commands.max` 速度上限。权重本身的说明见 [`MODEL_CARD.md`](MODEL_CARD.md)。
 
 ## 4. 运行控制器
 
-### Step 1: 进入目录并设置机型
-
 ```bash
 cd tron2_rl_deploy_python
-export ROBOT_TYPE=SF_TRON2A
-或 export ROBOT_TYPE=WF_TRON2A
-或 export ROBOT_TYPE=DASF_TRON2A
-```
+export ROBOT_TYPE=SF_TRON2A     # 或 WF_TRON2A / DASF_TRON2A
 
-### Step 2: 启动控制器
+python3 main.py                 # 不带参数：连接本机仿真 127.0.0.1
 
-默认连接本机仿真（`127.0.0.1`）：
-
-```bash
-python3 main.py
-```
-
-指定机器人或 SDK 目标 IP：
-
-```bash
 # 说明：<robot-ip> 是占位符，运行前请替换为您自己机器人 /
 # 仿真器的实际 IP。本仓库源码未硬编码任何私网地址。
-# （仅内部使用的姊妹仓库 tron2-rl-deploy-ros 在其源码 /
-# launch 文件中保留了作为文档示例的字面量 10.192.1.2，
-# 已在该仓库的 SECURITY.md 中声明。）
 python3 main.py <robot-ip>
 ```
 
@@ -153,18 +125,21 @@ python3 main.py <robot-ip>
 
 建议先启动仿真，再启动控制器。
 
-DA-SF 先启动 tron2_mujoco_sim 仿真器，控制端仍通过统一入口启动：
+DA-SF 使用同一个入口，把 `ROBOT_TYPE` 设为 `DASF_TRON2A` 即可。DA-SF 的上下身电机状态、命令和
+IMU 都走 Centaur SDK；手柄默认由 pygame 直连读取，只有在 pygame 或手柄不可用时才回退到 SDK 的
+`SensorJoy` 通道。指定非回环机器人 IP 时会启用真机关节坐标变换（大腿 yaw 零位偏移、膝和踝 pitch
+方向反转）；回环的 MuJoCo 目标不执行该变换。
 
-```bash
-export ROBOT_TYPE=DASF_TRON2A
-python3 main.py
-```
+### 仅仿真模式
 
-DA-SF 的上下身电机状态、命令、IMU 和远端手柄均通过 Centaur SDK 收发。
-控制器默认通过 pygame 直接读取 F710；未安装 pygame 或未检测到手柄时，
-自动回退到 SDK `SensorJoy`。默认 IP `127.0.0.1` 连接本机仿真，指定非回环
-机器人 IP 时强制启用真机关节坐标变换（大腿 yaw 零位偏移、膝和踝 pitch
-方向反转）。本地回环 MuJoCo 不执行该变换。
+在接入真机之前，请先在 LimX MuJoCo 仿真中完整验证控制回路：
+
+1. 使用与实际部署相同的 `ROBOT_TYPE` 启动仿真（tron2_mujoco_sim 中的 `simulator.py`）。
+2. 保持控制器目标 IP 为默认 `127.0.0.1`（`main.py` 在不带参数运行时即使用该值）。
+3. 运行 `python3 main.py`，确认观测数据流、动作输出与手柄绑定在仿真中均符合预期。
+
+只有在仅仿真验证通过后，才可考虑实机运行 —— 并且必须按
+[`SECURITY.md`](SECURITY.md#real-hardware-safety-notice) 要求，在机器人悬挂 / 支撑状态下进行。
 
 ## 6. 手柄控制说明
 
@@ -173,20 +148,24 @@ DA-SF 的上下身电机状态、命令、IMU 和远端手柄均通过 Centaur S
 - `L1 + A`（`×`）：IDLE，关节只加阻尼
 - `R1`：清空速度指令和策略历史
 
-按键编号按 F710 的 `X` 模式（`A`=0、`B`=1、`X`=2、`Y`=3、`L1`=4、`R1`=5），见各控制器中的 `JOY_BTNS`。
+按键编号按 F710 的 `X` 模式（`A`=0、`B`=1、`X`=2、`Y`=3、`L1`=4、`R1`=5），见各控制器中的
+`JOY_BTNS`。
 
-F710 背面切换到 `X` 模式并连接后，直接运行 `main.py`。启动日志出现
-`Direct joystick ready: Logitech Gamepad F710` 表示已启用直连，不需要
-运行 `robot-joystick`。
+F710 背面切换到 `X` 模式并连接后，直接运行 `main.py`。控制器自己找到手柄时不需要 `robot-joystick`，
+但不同机型的日志不同：
 
-如果日志显示 `Joystick source: limxsdk SensorJoy`，可另开终端运行手柄发布器：
+- SF / WF：`pygame joystick ready: <name>`，启动信息里还会有 `Pygame Joystick: ENABLED`。
+- DA-SF：`Direct joystick ready: <name>`，以及 `Joystick source: direct pygame/F710`。
+
+如果日志出现 `Joystick source: limxsdk SensorJoy` 或
+`pygame joystick: no device found, fallback to SDK joystick topic`，说明控制器在听 SDK 手柄话题。
+另开终端运行手柄发布器：
 
 ```
 ../tron2_mujoco_sim/robot-joystick/robot-joystick
 ```
 
-先按 `L1 + B` 等待到达默认姿态，再按 `L1 + Y` 启动策略。三个手柄轴按照
-`controllers/model/DASF_TRON2A/params.yaml` 中的 `commands.max` 缩放。
+先按 `L1 + B` 等待到达默认姿态，再按 `L1 + Y` 启动策略。
 
 ## 7. 效果展示
 
@@ -204,7 +183,7 @@ F710 背面切换到 `X` 模式并连接后，直接运行 `main.py`。启动日
 
 | SF_TRON2A | WF_TRON2A | DASF_TRON2A |
 | :---: | :---: | :---: |
-| <img src="doc/wf.GIF" alt="SF Real-world" width="260"> | <img src="doc/sf.GIF" alt="WF Real-world" width="260"> | <img src="doc/dasf.GIF" alt="DASF Real-world" width="260"> |
+| <img src="doc/sf.GIF" alt="SF Real-world" width="260"> | <img src="doc/wf.GIF" alt="WF Real-world" width="260"> | <img src="doc/dasf.GIF" alt="DASF Real-world" width="260"> |
 
 ## 8. 常见问题
 
@@ -217,50 +196,21 @@ F710 背面切换到 `X` 模式并连接后，直接运行 `main.py`。启动日
 
 ## 验证
 
-下列命令与 CI 使用的一致（参见
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml)），在提 PR 前
-本地跑一遍可减少来回。它们都不需要真机。
+装好 SDK wheel 后，在不接机器人的工作站上可以先跑这两项：
 
 ```bash
-# 1. 对所有 Python 文件进行字节码编译（捕获语法错误，
-#    无需安装 SDK wheel）。
-python -m compileall -q main.py controllers/
-
-# 2. Lint（推荐）。
-pip install ruff
-ruff check .
-
-# 3. 空跑导入 —— 触发模块级副作用但不调用 robot.init。
-#    需要已安装 LimX SDK wheel。
+# 各模块可导入，不调用 robot.init。
 python -c "import controllers"
 
-# 4. 校验所有 params 文件的 YAML。
-python -c "import yaml, glob
-for p in glob.glob('controllers/model/*/params.yaml'):
-    yaml.safe_load(open(p)); print('OK', p)"
-
-# 5. 校验 ONNX（仅加载图结构，不做推理）。
+# 每个 ONNX 图都能加载（不做推理）。
 python -c "import onnx, glob
 for p in glob.glob('controllers/model/*/*.onnx'):
     onnx.checker.check_model(onnx.load(p)); print('OK', p)"
 ```
 
-### 仅仿真模式
-
-在接入真机之前，请先在 LimX MuJoCo 仿真中完整验证控制回路：
-
-1. 使用与实际部署相同的 `ROBOT_TYPE` 启动仿真
-   (tron2_mujoco_sim 中的 `simulator.py`)。
-2. 保持控制器目标 IP 为默认 `127.0.0.1`（`main.py` 在不带参数运行时
-   即使用该值）。
-3. 运行 `python3 main.py`，确认观测数据流、动作输出与手柄绑定在
-   仿真中均符合预期。
-
-只有在仅仿真验证通过后，才可考虑实机运行——并且必须按
-[`SECURITY.md`](SECURITY.md#real-hardware-safety-notice) 要求，
-在机器人悬挂 / 支撑状态下进行。
-
----
+提 PR 时的完整检查 —— 字节码编译、`ruff`、`params.yaml` 校验和许可标记扫描 —— 见
+[`CONTRIBUTING.md`](CONTRIBUTING.md#verification-before-opening-a-pr)。其中 CI 在每次 push 和 pull
+request 上跑 `ruff`、字节码编译和许可标记扫描；这些步骤都不需要机器人。
 
 ## 引用与支持
 
@@ -277,61 +227,49 @@ for p in glob.glob('controllers/model/*/*.onnx'):
 
 - **Bug 反馈、特性请求和使用问题：**
   [GitHub Issues](https://github.com/limxdynamics/tron2_rl_deploy_python/issues)。
-- **安全漏洞 / 机器人安全事件：** 邮件至
-  `contact@limxdynamics.com`；详见 [`SECURITY.md`](SECURITY.md)。
+- **安全漏洞 / 机器人安全事件：** 邮件至 `contact@limxdynamics.com`；详见 [`SECURITY.md`](SECURITY.md)。
 - **公司 / 商务联系：** <https://www.limxdynamics.com>。
 
 ## 许可与归属
 
-本项目采用 **Apache License, Version 2.0**（2004 年 1 月）开源协议，
-完整条款请见 [`LICENSE`](LICENSE) 文件。SPDX 标识：`Apache-2.0`。
+本项目采用 **Apache License, Version 2.0**（2004 年 1 月）开源协议，完整条款请见
+[`LICENSE`](LICENSE) 文件。SPDX 标识：`Apache-2.0`。
 
 - [`NOTICE`](NOTICE) — 必要的归属声明。
-- [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) — 已签入 ONNX
-  权重、`limxsdk-lowlevel` 子模块、Python 运行依赖（`onnxruntime`、
-  `numpy`、`scipy`、`pyyaml`、`pygame`）以及文档媒体的逐项来源说明。
-- [`MODEL_CARD.md`](MODEL_CARD.md) — `controllers/model/` 下全部六个
-  SF/WF/DASF ONNX 模型的模型卡。
+- [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) — 已签入 ONNX 权重、`limxsdk-lowlevel`
+  子模块、Python 运行依赖（`onnxruntime`、`numpy`、`scipy`、`pyyaml`、`pygame`）以及文档媒体的
+  逐项来源说明。
+- [`MODEL_CARD.md`](MODEL_CARD.md) — `controllers/model/` 下全部六个 SF/WF/DASF ONNX 模型的模型卡。
 - [`SECURITY.md`](SECURITY.md) — 漏洞上报流程及实机安全须知。
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — 开发环境（`pip`、`ruff`）、
-  验证步骤、DCO 签署与模型来源规则。
-- [`CHANGELOG.md`](CHANGELOG.md) — 版本变更记录以及待相关负责人
-  签署确认的事项。
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — 开发环境（`pip`、`ruff`）、验证步骤、DCO 签署与模型来源规则。
+- [`CHANGELOG.md`](CHANGELOG.md) — 版本变更记录以及待相关负责人签署确认的事项。
 
 ## 适用范围与除外
 
 本仓库**包含**：
 
-- Python 控制器入口 (`main.py`) 与分形态控制器
-  (`controllers/SolefootController.py`、
-  `controllers/WheelfootController.py`、
-  `controllers/DASFController.py`)。
+- Python 控制器入口 (`main.py`) 与分形态控制器 (`controllers/SolefootController.py`、
+  `controllers/WheelfootController.py`、`controllers/DASFController.py`)。
 - 运行时配置 (`controllers/model/*/params.yaml`)。
-- 六个 ONNX 推理文件（`SF_TRON2A`、`WF_TRON2A` 与
-  `DASF_TRON2A` 的 `policy.onnx`、`encoder.onnx`）——**来源确认待签署**，
-  详见
-  [`MODEL_CARD.md`](MODEL_CARD.md) 及
+- 六个 ONNX 推理文件（`SF_TRON2A`、`WF_TRON2A` 与 `DASF_TRON2A` 的 `policy.onnx`、
+  `encoder.onnx`）—— **来源确认待签署**，详见 [`MODEL_CARD.md`](MODEL_CARD.md) 及
   [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) 第 2 节。
-- 供应商 SDK **子模块引用** (`limxsdk-lowlevel/`) ——
-  **SDK 责任方 / 法务确认待签署**，未获书面签署前请勿变动 pin。
+- 供应商 SDK **子模块引用** (`limxsdk-lowlevel/`) —— **SDK 责任方 / 法务确认待签署**，
+  未获书面签署前请勿变动 pin。
 
 本仓库**不包含**（按设计）：
 
 - 不包含 PyTorch / 训练权重（`.pt`、`.pth`、`.ckpt`、`.safetensors`）。
-- 不包含 SDK 二进制（`.so`、`.dll`、`.dylib`、`.lib`、`.whl`）——请自行
-  从内置的 `limxsdk-lowlevel/` 子模块安装 LimX SDK wheel。
+- 不包含 SDK 二进制（`.so`、`.dll`、`.dylib`、`.lib`、`.whl`）—— 请自行从内置的
+  `limxsdk-lowlevel/` 子模块安装 LimX SDK wheel。
 - 不包含固件、出厂标定值或按序列号的标定文件。
 - 不包含 rosbag / MCAP / 轨迹回放。
 - 不包含客户或现场专属配置。
-- **不预置机器人 IP。** 下方第 4 章示例中的 `<robot-ip>` 是
-  **占位符**——运行前请替换为您自己机器人或仿真器的实际 IP。
-  本仓库源码不包含任何硬编码的私网地址。仅内部使用的姊妹仓库
-  `tron2-rl-deploy-ros` 在其源码 / launch 文件中保留了一处
-  作为文档示例的字面量 `10.192.1.2`，该情况已在该仓库的
-  `SECURITY.md` 中声明；本仓库有意不含此类字面量。
+- **不预置机器人 IP。** 本仓库源码不包含任何硬编码的私网地址。仅内部使用的姊妹仓库
+  `tron2-rl-deploy-ros` 在其源码 / launch 文件中保留了一处作为文档示例的字面量 `10.192.1.2`，
+  该情况已在该仓库的 `SECURITY.md` 中声明；本仓库有意不含此类字面量。
 
-> **实机安全提示。** 本仓库**并非仅供仿真使用**。`main.py`
-> 会向您指定的 IP 打开 SDK 连接，控制器会下发关节力矩，真实机器人会实际执行。
-> DA-SF 通过 Centaur SDK 同时控制上下身通道。
+> **实机安全提示。** 本仓库**并非仅供仿真使用**。`main.py` 会向您指定的 IP 打开 SDK 连接，
+> 控制器会下发关节力矩，真实机器人会实际执行。DA-SF 通过 Centaur SDK 同时控制上下身通道。
 > 在将本代码指向物理设备之前，请务必阅读
 > [`SECURITY.md`](SECURITY.md#real-hardware-safety-notice)。
