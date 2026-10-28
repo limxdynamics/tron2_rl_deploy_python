@@ -90,6 +90,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   or simulator IP. No production or internal-network IP is embedded
   in this repository.
 
+### Fixed
+- `xml_path` in the three `params.yaml` files now names the model
+  repository as it is called today. It read `robot-description/...`, the
+  repository's old name: that URL now redirects to
+  `limxdynamics/tron1-robot-description`, which carries the TRON1 tree
+  (`pointfoot/...`), so none of the three paths resolved. The TRON2 models
+  have also moved since: the series directory is `tron2a/` (`tron2b/` for the
+  TRON2B revision) and the biped-plus-arms variant is spelled `DASF_TRON2A`,
+  not `DA_SF`. The three lines are now
+  `tron2-robot-description/tron2a/{DASF_TRON2A,SF_TRON2A,WF_TRON2A}/xml/robot.xml`,
+  each checked against the repository tree. `PointfootCfg` reads the field
+  into `self.xml_path` (`DASFController.py:36`) and no controller reads it
+  afterwards, and `DryRunRobot` does not touch it, so nothing changes at
+  runtime; the line is kept because it records where the MuJoCo model sits
+  next to this repository.
+
 ### Resolved (2026-07-16)
 - **Private-IP handling** — resolved 2026-07-16 per owner decision.
   All Markdown / YAML command examples now use `<robot-ip>` as a

@@ -1,6 +1,6 @@
 PointfootCfg:
   robot_variant: SF_TRON2A
-  xml_path: robot-description/SF_TRON2A/xml/robot.xml
+  xml_path: tron2-robot-description/tron2a/SF_TRON2A/xml/robot.xml
 
   loop_frequency: 500
   init_state:
