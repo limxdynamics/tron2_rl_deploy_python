@@ -21,6 +21,8 @@
 
 # tron2-rl-deploy-python
 
+> **TRON2 开源生态的一部分。** 上手路线和其他 TRON2 仓库：[TRON2 快速上手](https://github.com/limxdynamics/limxdynamics/blob/main/doc/quickstart_cn.md#tron2)。
+
 > **发布渠道。** 本仓库的主发布点为 GitHub：
 > <https://github.com/limxdynamics/tron2_rl_deploy_python>。
 > LimX 内部 GitLab 为镜像；Issue、PR 与安全报告请提交到 GitHub。
