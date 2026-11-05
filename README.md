@@ -250,7 +250,6 @@ If you use this deployment stack in academic or public work, please cite the rep
   [GitHub Issues](https://github.com/limxdynamics/tron2_rl_deploy_python/issues).
 - **Security reports / robot-safety incidents:** email `contact@limxdynamics.com`; see
   [`SECURITY.md`](SECURITY.md).
-- **Company / commercial contact:** <https://www.limxdynamics.com>.
 
 ## License & attribution
 

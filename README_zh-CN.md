@@ -232,7 +232,6 @@ request 上跑 `ruff`、字节码编译和许可标记扫描；这些步骤都�
 - **Bug 反馈、特性请求和使用问题：**
   [GitHub Issues](https://github.com/limxdynamics/tron2_rl_deploy_python/issues)。
 - **安全漏洞 / 机器人安全事件：** 邮件至 `contact@limxdynamics.com`；详见 [`SECURITY.md`](SECURITY.md)。
-- **公司 / 商务联系：** <https://www.limxdynamics.com>。
 
 ## 许可与归属
 
