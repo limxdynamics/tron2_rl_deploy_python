@@ -16,11 +16,11 @@ jobs:
     name: Lint + byte-compile
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
@@ -47,7 +47,7 @@ jobs:
     name: Submodule pin sanity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
@@ -70,7 +70,7 @@ jobs:
     name: Model / weight / binary deny-list
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
@@ -114,7 +114,7 @@ jobs:
     name: Private-IP scan (allowlisted)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
@@ -150,7 +150,7 @@ jobs:
     name: License / TODO scan + EXIF sanity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
